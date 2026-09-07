@@ -1,31 +1,23 @@
+<!doctype html>
+<html lang="th">
+<head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>เทียบราคาวัสดุก่อสร้าง — เอสเจเอฟ ฟาร์ม</title>
 <style>
 :root{
   --paper:#f2f4f6; --card:#ffffff; --ink:#1c2830; --muted:#5c6f7c;
   --line:#d7dee4; --accent:#2b5f8f; --accent-soft:#e3edf5;
   --best:#1e7a4a; --best-soft:#e2f2e9; --warn:#9a6a1b; --warn-soft:#f7eeda;
-  --chip:#eef1f4;
+  --chip:#eef1f4; --danger:#a33;
 }
 @media (prefers-color-scheme: dark){
   :root{
     --paper:#0f161b; --card:#16212a; --ink:#dce6ed; --muted:#8ea3b2;
     --line:#2a3843; --accent:#6fa8d6; --accent-soft:#1c2f3f;
     --best:#4cc38a; --best-soft:#15352a; --warn:#d9a94e; --warn-soft:#33290f;
-    --chip:#1f2c36;
+    --chip:#1f2c36; --danger:#e08080;
   }
-}
-:root[data-theme="light"]{
-  --paper:#f2f4f6; --card:#ffffff; --ink:#1c2830; --muted:#5c6f7c;
-  --line:#d7dee4; --accent:#2b5f8f; --accent-soft:#e3edf5;
-  --best:#1e7a4a; --best-soft:#e2f2e9; --warn:#9a6a1b; --warn-soft:#f7eeda;
-  --chip:#eef1f4;
-}
-:root[data-theme="dark"]{
-  --paper:#0f161b; --card:#16212a; --ink:#dce6ed; --muted:#8ea3b2;
-  --line:#2a3843; --accent:#6fa8d6; --accent-soft:#1c2f3f;
-  --best:#4cc38a; --best-soft:#15352a; --warn:#d9a94e; --warn-soft:#33290f;
-  --chip:#1f2c36;
 }
 *{box-sizing:border-box}
 body{
@@ -33,210 +25,221 @@ body{
   font-family:"Sukhumvit Set","Leelawadee UI","Noto Sans Thai","Thonburi",-apple-system,"Segoe UI",sans-serif;
   line-height:1.55; font-size:15px;
 }
-.wrap{max-width:980px; margin:0 auto; padding:28px 18px 60px}
-header{border-bottom:3px solid var(--accent); padding-bottom:18px; margin-bottom:22px}
-.eyebrow{font-size:12px; letter-spacing:.12em; color:var(--accent); font-weight:600; text-transform:uppercase}
-h1{font-size:26px; margin:6px 0 4px; text-wrap:balance}
-.sub{color:var(--muted); font-size:14px; margin:0}
-.stats{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
-.stat{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 14px}
-.stat b{font-size:18px; font-variant-numeric:tabular-nums}
-.stat span{display:block; font-size:12px; color:var(--muted)}
-h2{font-size:19px; margin:34px 0 6px; color:var(--accent)}
-.hint{color:var(--muted); font-size:13px; margin:0 0 14px}
-.item{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:12px}
-.item-head{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap}
-.no{color:var(--accent); font-weight:700; font-variant-numeric:tabular-nums; min-width:1.6em}
-.iname{font-weight:700; font-size:16px}
+.wrap{max-width:980px; margin:0 auto; padding:20px 14px 60px}
+header{border-bottom:3px solid var(--accent); padding-bottom:14px; margin-bottom:18px}
+.eyebrow{font-size:12px; letter-spacing:.12em; color:var(--accent); font-weight:600}
+h1{font-size:22px; margin:6px 0 4px}
+.sub{color:var(--muted); font-size:13px; margin:0}
+.stats{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.stat{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:6px 12px}
+.stat b{font-size:16px; font-variant-numeric:tabular-nums}
+.stat span{display:block; font-size:11px; color:var(--muted)}
+h2{font-size:18px; margin:28px 0 6px; color:var(--accent)}
+.hint{color:var(--muted); font-size:13px; margin:0 0 12px}
+.item{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:10px}
+.item-head{display:flex; gap:8px; align-items:baseline; flex-wrap:wrap}
+.no{color:var(--accent); font-weight:700; min-width:1.6em; font-variant-numeric:tabular-nums}
+.iname{font-weight:700; font-size:15px}
 .qty{color:var(--muted); font-size:13px}
+.inote{color:var(--warn); font-size:12px}
 .offers{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px}
-.offer{background:var(--chip); border:1px solid var(--line); border-radius:7px; padding:6px 10px; font-size:13px}
+.offer{background:var(--chip); border:1px solid var(--line); border-radius:7px; padding:6px 10px; font-size:13px; position:relative}
 .offer .p{font-weight:700; font-variant-numeric:tabular-nums; display:block; font-size:14px}
-.offer .v{color:var(--muted); font-size:12px}
+.offer .v{color:var(--muted); font-size:12px; display:block; max-width:220px}
 .offer.best{background:var(--best-soft); border-color:var(--best)}
 .offer.best .p{color:var(--best)}
 .offer.best .v::before{content:"✓ "; color:var(--best); font-weight:700}
+.offer .acts{margin-top:4px; display:flex; gap:6px}
 .none{color:var(--warn); background:var(--warn-soft); border:1px dashed var(--warn); border-radius:7px; padding:6px 10px; font-size:13px; display:inline-block}
-.online{font-size:13px; color:var(--muted); margin:6px 0 2px}
-.online b{color:var(--ink)}
-.note{font-size:13px; color:var(--warn); background:var(--warn-soft); border-radius:6px; padding:5px 10px; margin:8px 0 2px; display:inline-block}
-.links{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
+.links{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
 .links a{
   font-size:12px; text-decoration:none; color:var(--accent);
   border:1px solid var(--line); background:var(--accent-soft);
-  border-radius:6px; padding:4px 9px; font-weight:600;
+  border-radius:6px; padding:3px 8px; font-weight:600;
 }
-.links a:hover,.links a:focus-visible{border-color:var(--accent); outline:none}
+button{
+  font-family:inherit; font-size:13px; border-radius:7px; cursor:pointer;
+  border:1px solid var(--line); background:var(--accent-soft); color:var(--accent);
+  padding:5px 10px; font-weight:600;
+}
+button.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+button.tiny{font-size:11px; padding:1px 7px; font-weight:500}
+button.danger{color:var(--danger)}
+.toolbar{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 14px}
 table{width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:14px}
-th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line)}
+th,td{padding:8px 11px; text-align:left; border-bottom:1px solid var(--line)}
 th{background:var(--accent-soft); color:var(--accent); font-size:13px}
 td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
 tr:last-child td{border-bottom:none}
 .tbl-scroll{overflow-x:auto; border-radius:10px}
-.plan td:first-child{font-weight:700; color:var(--accent)}
 .total-row td{font-weight:700; background:var(--best-soft); color:var(--best)}
-ul.warns{padding-left:20px; margin:8px 0}
-ul.warns li{margin-bottom:6px; font-size:14px}
-footer{margin-top:36px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:12px}
-@media (prefers-reduced-motion: no-preference){
-  .item{transition:border-color .15s}
-  .item:hover{border-color:var(--accent)}
-}
+footer{margin-top:32px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:10px}
+#loading{padding:30px; text-align:center; color:var(--muted)}
 </style>
-
+</head>
+<body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">ใบขอซื้อ / เบิกอุปกรณ์ก่อสร้าง · ก.ย. 2569</div>
+  <div class="eyebrow">ใบขอซื้อ / เบิกอุปกรณ์ก่อสร้าง</div>
   <h1>เทียบราคาวัสดุก่อสร้าง — เอสเจเอฟ ฟาร์ม</h1>
-  <p class="sub">เทียบใบเสนอราคา 10 ร้าน (ราชบุรี · กทม.) ทุกตัวเลขปรับเป็น <b>ราคารวม VAT</b> แล้ว เพื่อเทียบกันตรง ๆ · ปุ่มด้านล่างแต่ละรายการกดค้นราคาจากร้านวัสดุทั่วประเทศได้ทันที</p>
-  <div class="stats">
-    <div class="stat"><b>18</b><span>รายการขอซื้อ</span></div>
-    <div class="stat"><b>10</b><span>ร้านที่เสนอราคา</span></div>
-    <div class="stat"><b>≈165,144 ฿</b><span>ถ้าซื้อเจ้าถูกสุดทุกรายการ</span></div>
-    <div class="stat"><b>3</b><span>รายการยังไม่มีราคา</span></div>
-  </div>
+  <p class="sub">กรอก/แก้ราคาได้เลย ข้อมูลบันทึกอัตโนมัติ ทุกคนเห็นเหมือนกัน · <b>กรอกราคาเป็นยอดรวมของจำนวนที่ขอซื้อ แบบรวม VAT แล้ว</b> · ชิปเขียว ✓ = ถูกสุด</p>
+  <div class="stats" id="stats"></div>
 </header>
 
-<h2>เทียบราคารายรายการ</h2>
-<p class="hint">ชิปสีเขียว ✓ = เจ้าถูกสุดของรายการนั้น · ราคาในชิปเป็นยอดรวมของจำนวนที่ขอซื้อ (รวม VAT)</p>
+<div class="toolbar">
+  <button class="primary" onclick="addItem()">＋ เพิ่มรายการของ</button>
+  <button onclick="load()">⟳ รีเฟรชข้อมูล</button>
+</div>
+
+<div id="loading">กำลังโหลดข้อมูล…</div>
 <div id="items"></div>
 
-<h2>ยอดรวมตามใบเสนอราคาแต่ละร้าน</h2>
-<div class="tbl-scroll"><table>
-<tr><th>ร้าน</th><th>พื้นที่</th><th>รายการที่เสนอ</th><th class="num">ยอดรวม (รวม VAT)</th></tr>
-<tr><td>เสริมพัฒนาค้าเหล็ก (หนุ่มเครน)</td><td>ราชบุรี</td><td>แหวนอีแปะ · ลูกกลิ้ง · อะไหล่ · แปรงทาสี</td><td class="num">2,916.00</td></tr>
-<tr><td>แอล.ที.แอล ทูลส์</td><td>บ้านโป่ง</td><td>ดอกสว่าน NACHI · เครื่องเจียร Makita</td><td class="num">4,550.00</td></tr>
-<tr><td>เคี้ยงเส็งเคหะภัณฑ์</td><td>ราชบุรี</td><td>เครื่องเจียร · แหวนอีแปะ · ดอกโรตารี่</td><td class="num">4,465.00</td></tr>
-<tr><td>กลชัยการไฟฟ้า</td><td>ราชบุรี</td><td>ชุด LED ×50 · เทปพันสาย ×30</td><td class="num">4,660.00 (บิลเงินสด)</td></tr>
-<tr><td>วิโรจน์กลการ (2017)</td><td>ราชบุรี</td><td>ด้ามพ่นยา 2 ฟุต / 3 ฟุต</td><td class="num">10,914.00</td></tr>
-<tr><td>ฉัตรชัยค้าไม้และวัสดุก่อสร้าง</td><td>ราชบุรี</td><td>ไม้ฝา · ลูกกลิ้ง · อะไหล่ · แปรงทาสี</td><td class="num">10,764.20 (ไม่รวมส่ง)</td></tr>
-<tr><td>จีวาย เอเชีย (GY Asia)</td><td>กทม. (ส่งฟรี)</td><td>SikaSeparol LP + Antisol-S 200L</td><td class="num">23,700.50</td></tr>
-<tr><td>โปรซูเมอร์ ซัพพลาย</td><td>กทม.</td><td>Sika Separol TH + Antisol S TH 200L</td><td class="num">24,278.30</td></tr>
-<tr><td>ไพศาลฮาร์ดแวร์ ราชบุรี</td><td>ราชบุรี</td><td>8 รายการ รวมมอเตอร์มิตซู 5HP</td><td class="num">30,773.20</td></tr>
-<tr><td>สุริยะพาวเวอร์</td><td>กทม.</td><td>มอเตอร์ ABB 50HP (ลด 35%) + ส่ง</td><td class="num">95,233.21</td></tr>
-</table></div>
+<h2>ยอดรวมแต่ละร้าน</h2>
+<div class="tbl-scroll"><table id="vendorTable"></table></div>
 
-<h2>แผนซื้อประหยัดสุด (แยกตามร้าน)</h2>
-<div class="tbl-scroll"><table class="plan">
-<tr><th>ร้าน</th><th>ซื้ออะไร</th><th class="num">ยอด (รวม VAT)</th></tr>
-<tr><td>ฉัตรชัยค้าไม้</td><td>ไม้ฝา 100 แผ่น · ลูกกลิ้ง 20 · แปรงทาสี 24</td><td class="num">10,443.20</td></tr>
-<tr><td>หนุ่มเครน</td><td>แหวนอีแปะ 3/8" 3 กก. · อะไหล่ลูกกลิ้ง 36 ลูก</td><td class="num">480.00</td></tr>
-<tr><td>กลชัยการไฟฟ้า</td><td>ชุด LED 50 ชุด · เทปพันสาย 30 ม้วน</td><td class="num">4,660.00</td></tr>
-<tr><td>ไพศาลฮาร์ดแวร์</td><td>ดอกสว่าน SUTTON 10 ดอก · มอเตอร์มิตซู 5HP</td><td class="num">17,869.00</td></tr>
-<tr><td>แอล.ที.แอล ทูลส์</td><td>เครื่องเจียร Makita M9513B ×2</td><td class="num">2,700.00</td></tr>
-<tr><td>วิโรจน์กลการ</td><td>ด้ามพ่น 2 ฟุต ×30 · 3 ฟุต ×30</td><td class="num">10,914.00</td></tr>
-<tr><td>จีวาย เอเชีย</td><td>SikaSeparol LP 200L (ถูกกว่า แต่คนละรุ่นกับ TH)</td><td class="num">18,725.00</td></tr>
-<tr><td>โปรซูเมอร์</td><td>Sika Antisol S TH 200L (เช็คค่าส่งต่างจังหวัด)</td><td class="num">4,119.50</td></tr>
-<tr><td>สุริยะพาวเวอร์</td><td>มอเตอร์ ABB 50HP M2BAX 225SMA4</td><td class="num">95,233.21</td></tr>
-<tr class="total-row"><td colspan="2">รวมโดยประมาณ (ยังไม่รวม 3 รายการที่ไม่มีราคา + ค่าส่งบางร้าน)</td><td class="num">≈165,144</td></tr>
-</table></div>
-
-<h2>ข้อควรระวังก่อนสั่งซื้อ</h2>
-<ul class="warns">
-<li><b>น้ำยา Sika:</b> จีวายเสนอ Separol <b>LP</b> แต่ใบขอซื้อระบุ Separol <b>TH</b> — คนละรุ่น ควรยืนยันสเปกก่อน ถ้าต้อง TH เท่านั้น โปรซูเมอร์คือเจ้าเดียวที่เสนอตรงรุ่น (24,278.30 ทั้งชุด)</li>
-<li><b>มอเตอร์มิตซู:</b> หัวใบขอซื้อระบุ 5HP แต่ในบิลไพศาลพิมพ์ "SCL-QR <b>3HP</b> 4P 220V" — ให้ร้านยืนยันรุ่นก่อนวางเงิน (ราคาออนไลน์ 5HP อยู่ช่วง 14,990–16,149 ฿ ใกล้เคียงกัน)</li>
-<li><b>ดอกสว่านเคี้ยงเส็ง:</b> เป็นดอกโรตารี่บ๊อช 10×160 มม. (เจาะปูน) ไม่ใช่ดอกเจาะเหล็ก 3/8" ตามใบขอซื้อ</li>
-<li><b>ด้ามพ่นยา 3 ฟุต:</b> ขอ 40 ด้าม แต่วิโรจน์กลการเสนอมา 30 ด้าม — ขาด 10</li>
-<li><b>เครื่องเจียร Makita M9513B:</b> ราคาออนไลน์ถูกสุด ~1,050–1,530 ฿/เครื่อง (เทียบร้านเสนอ 1,300–1,350) ถ้าซื้อออนไลน์ 2 เครื่องอาจประหยัดอีก ~600 ฿</li>
-<li><b>ชุด LED กลชัย @80 ฿:</b> ถูกกว่าราคาตลาด LEKISE (~130–150 ฿/ชุด) มาก — เช็คว่าเป็นยี่ห้อ/รับประกันแบบไหน และเป็นบิลเงินสดไม่มี VAT (เบิกภาษีซื้อไม่ได้)</li>
-<li><b>ยังไม่มีใครเสนอราคา 3 รายการ:</b> ลูกถ้วยอ่อน A-21 (20 ลูก) · ลูกถ้วยแข็ง A-21 (10 ลูก) · แหวนอีแปะ 3 มิล (100 อัน) — ใช้ปุ่มค้นหาด้านบนหาร้านเพิ่มได้</li>
-</ul>
-
-<footer>จัดทำจากใบเสนอราคา 10 ใบ ลงวันที่ 2–5 ก.ย. 2569 · ราคาออนไลน์อ้างอิง ณ 7 ก.ย. 2569 อาจเปลี่ยนแปลงได้ · ลิงก์ค้นหาพาไปหน้าค้นหาของแต่ละร้าน (ไทวัสดุ/โกลบอลเฮ้าส์/ดูโฮม/HomePro/OneStockHome มีสาขา-ส่งถึงราชบุรี นครปฐม เพชรบุรี และทั่วประเทศ)</footer>
+<footer>ราคาที่กรอก = ยอดรวมของจำนวนที่ขอซื้อ รวม VAT · ปุ่มลิงก์พาไปหน้าค้นหาราคาของแต่ละร้านค้าออนไลน์ (ส่งถึงราชบุรีและทั่วประเทศ) · แก้ไขข้อมูลได้ทุกคนที่มีลิงก์นี้</footer>
 </div>
 
 <script>
+var SB = 'https://hrwiexhnpczgbrlfpmwz.supabase.co';
+var KEY = 'sb_publishable_rMUFNQTaBx1jatFJBwUaIA_Wx1vP4SF';
+var H = {'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json'};
 var SHOPS = [
   ["ไทวัสดุ", "https://www.thaiwatsadu.com/th/search/"],
   ["โกลบอลเฮ้าส์", "https://globalhouse.co.th/search?q="],
   ["ดูโฮม", "https://www.dohome.co.th/th/catalogsearch/result/?q="],
   ["HomePro", "https://www.homepro.co.th/search?searchtext="],
-  ["OneStockHome", "https://www.onestockhome.com/th/search?q="],
   ["Lazada", "https://www.lazada.co.th/catalog/?q="],
   ["Shopee", "https://shopee.co.th/search?keyword="],
   ["Google", "https://www.google.com/search?q="]
 ];
-var ITEMS = [
- {n:1, name:"ไม้ฝาเฌอร่า 8\" × 4 ม.", qty:"100 แผ่น",
-  offers:[{v:"ฉัตรชัยค้าไม้", p:"8,560.00", note:"ตราเพชร ลายไม้ 20×400×0.8 ซม. @80/แผ่น", best:true}],
-  online:"ไทวัสดุขายตราเพชรมัดละ 4 แผ่น ≈320 ฿ (≈80 ฿/แผ่น) — ราคาฉัตรชัยเท่าตลาด · ถ้าต้อง \"เฌอร่า\" แท้ ราคาจะสูงกว่านี้",
-  q:"ไม้ฝา 8 นิ้ว 4 เมตร"},
- {n:2, name:"แหวนอีแปะ 3/8\"", qty:"3 กก.",
-  offers:[{v:"หนุ่มเครน", p:"165.00", note:"รวม VAT แล้ว", best:true},{v:"เคี้ยงเส็ง", p:"176.55"},{v:"ไพศาลฮาร์ดแวร์", p:"192.60"}],
-  online:"", q:"แหวนอีแปะ 3/8 นิ้ว"},
- {n:3, name:"ลูกกลิ้งทาสี 4 นิ้ว มีด้าม", qty:"20 ด้าม",
-  offers:[{v:"ฉัตรชัยค้าไม้", p:"856.00", note:"Eagle One @40", best:true},{v:"หนุ่มเครน", p:"900.00", note:"SOMIC 2in1"},{v:"ไพศาลฮาร์ดแวร์", p:"1,391.00", note:"PUMPKIN @65"}],
-  online:"", q:"ลูกกลิ้งทาสี 4 นิ้ว พร้อมด้าม"},
- {n:4, name:"อะไหล่ลูกกลิ้ง 4 นิ้ว", qty:"30 ลูก",
-  offers:[{v:"หนุ่มเครน", p:"315.00", note:"ได้ 36 อัน (3 แพ็ค×12)", best:true},{v:"ฉัตรชัยค้าไม้", p:"321.00", note:"ได้ 36 ลูก"},{v:"ไพศาลฮาร์ดแวร์", p:"577.80", note:"30 อัน PUMPKIN"}],
-  online:"", q:"อะไหล่ลูกกลิ้งทาสี 4 นิ้ว"},
- {n:5, name:"แปรงทาสี 3 นิ้ว", qty:"2 โหล (24 อัน)",
-  offers:[{v:"ฉัตรชัยค้าไม้", p:"1,027.20", note:"Keenness @40", best:true},{v:"หนุ่มเครน", p:"1,536.00", note:"POWER @64"}],
-  online:"", q:"แปรงทาสี 3 นิ้ว"},
- {n:6, name:"ลูกถ้วยอ่อน A-21", qty:"20 ลูก", offers:[], online:"", q:"ลูกถ้วยไฟฟ้า A-21"},
- {n:7, name:"ลูกถ้วยแข็ง A-21", qty:"10 ลูก", offers:[], online:"", q:"ลูกถ้วยแข็ง A-21"},
- {n:8, name:"หลอดไฟสั้นแอลอีดี 9W พร้อมขา", qty:"50 ชุด",
-  offers:[{v:"กลชัยการไฟฟ้า", p:"4,000.00", note:"@80 บิลเงินสด ไม่ระบุยี่ห้อ", best:true},{v:"ไพศาลฮาร์ดแวร์", p:"6,955.00", note:"LEKISE @130"}],
-  online:"ราคาตลาดชุดราง LEKISE 9W ≈130–150 ฿/ชุด — ของกลชัยถูกกว่ามาก ควรเช็คยี่ห้อ/ประกัน",
-  q:"ชุดรางหลอดไฟ LED T8 9W"},
- {n:9, name:"เทปดำพันสายไฟ (ใหญ่)", qty:"30 ม้วน",
-  offers:[{v:"กลชัยการไฟฟ้า", p:"660.00", note:"@22", best:true},{v:"ไพศาลฮาร์ดแวร์", p:"898.80", note:"ตราวาง @28"}],
-  online:"", q:"เทปพันสายไฟ ม้วนใหญ่"},
- {n:10, name:"ดอกสว่านเจาะเหล็ก 3/8\"", qty:"10 ดอก",
-  offers:[{v:"ไพศาลฮาร์ดแวร์", p:"1,605.00", note:"SUTTON @150", best:true},{v:"แอล.ที.แอล", p:"1,850.00", note:"NACHI @185 รวม VAT"},{v:"เคี้ยงเส็ง", p:"1,819.00", note:"⚠ บ๊อช 10×160 = ดอกเจาะปูน คนละประเภท"}],
-  online:"", q:"ดอกสว่านเจาะเหล็ก 3/8 นิ้ว"},
- {n:11, name:"ปืน/ด้ามพ่นยาฆ่าเชื้อ 3 ฟุต", qty:"40 ด้าม",
-  offers:[{v:"วิโรจน์กลการ", p:"6,420.00", note:"⚠ เสนอแค่ 30 ด้าม @200", best:true}],
-  online:"", q:"ด้ามพ่นยา 3 ฟุต"},
- {n:12, name:"มอเตอร์มิตซู SCL-QR 5HP 4P 220V IP22", qty:"1 เครื่อง",
-  offers:[{v:"ไพศาลฮาร์ดแวร์", p:"16,264.00", note:"⚠ ในบิลพิมพ์ 3HP — ให้ร้านยืนยันรุ่น", best:true}],
-  online:"ออนไลน์: EEKMORE 14,990 ฿ · EXOGRO 16,149 ฿ (5HP แท้) — ต่อรองไพศาลหรือซื้อออนไลน์ได้",
-  q:"มอเตอร์ มิตซูบิชิ SCL-QR 5HP 220V"},
- {n:13, name:"เครื่องเจียร 4 นิ้ว มากีต้า", qty:"2 เครื่อง",
-  offers:[{v:"แอล.ที.แอล", p:"2,700.00", note:"M9513B รวม VAT", best:true},{v:"เคี้ยงเส็ง", p:"2,782.00", note:"@1,300"},{v:"ไพศาลฮาร์ดแวร์", p:"2,889.00", note:"@1,350"}],
-  online:"ออนไลน์ถูกสุด ~1,050–1,530 ฿/เครื่อง (waantong ส่งฟรี 1,050) — 2 เครื่อง ≈2,100 ฿ ประหยัดกว่าทุกร้าน",
-  q:"Makita M9513B เครื่องเจียร 4 นิ้ว"},
- {n:14, name:"น้ำยาทาแบบ SikaSeparol TH 200L", qty:"1 ถัง",
-  offers:[{v:"จีวาย เอเชีย", p:"18,725.00", note:"⚠ รุ่น LP ไม่ใช่ TH · ส่งฟรี", best:true},{v:"โปรซูเมอร์", p:"20,158.80", note:"รุ่น TH ตรงสเปก"}],
-  online:"", q:"Sika Separol 200 ลิตร"},
- {n:15, name:"น้ำยาบ่มคอนกรีต Sika Antisol S TH 200L", qty:"1 ถัง",
-  offers:[{v:"โปรซูเมอร์", p:"4,119.50", note:"เช็คค่าส่งมาราชบุรี", best:true},{v:"จีวาย เอเชีย", p:"4,975.50", note:"ส่งฟรีเมื่อซื้อครบ 15,000"}],
-  online:"ทั้งชุด Sika 2 ถัง: จีวาย 23,700.50 (ส่งฟรี) vs โปรซูเมอร์ 24,278.30 — ถ้าแยกซื้อให้คิดค่าส่งด้วย",
-  q:"Sika Antisol S 200 ลิตร"},
- {n:16, name:"แหวนอีแปะ 3 มิล", qty:"100 อัน", offers:[], online:"", q:"แหวนอีแปะ 3 มม"},
- {n:17, name:"ด้ามพ่น 2 ฟุต", qty:"30 อัน",
-  offers:[{v:"วิโรจน์กลการ", p:"4,494.00", note:"@140", best:true}],
-  online:"", q:"ด้ามพ่นยา 2 ฟุต"},
- {n:18, name:"มอเตอร์ ABB 50 แรงม้า 4 โพล (M2BAX 225SMA4 37kW)", qty:"1 ตัว",
-  offers:[{v:"สุริยะพาวเวอร์", p:"95,233.21", note:"ลด 35% จาก 134,620 + ส่ง 1,500", best:true}],
-  online:"ราคาออนไลน์รุ่นนี้ไม่แสดงหน้าเว็บ ต้องขอใบเสนอราคาเทียบ (moveengstore, yonghong, industrypro)",
-  q:"ABB M2BAX 225SMA4 37kW ราคา"}
-];
+var DATA = [];
 
-var host = document.getElementById("items");
-var html = "";
-for (var i = 0; i < ITEMS.length; i++) {
-  var it = ITEMS[i];
-  html += '<div class="item"><div class="item-head"><span class="no">' + it.n + '</span>' +
-          '<span class="iname">' + it.name + '</span><span class="qty">× ' + it.qty + '</span></div>';
-  if (it.offers.length) {
-    html += '<div class="offers">';
-    for (var j = 0; j < it.offers.length; j++) {
-      var o = it.offers[j];
-      html += '<div class="offer' + (o.best ? ' best' : '') + '"><span class="p">' + o.p + ' ฿</span>' +
-              '<span class="v">' + o.v + (o.note ? ' · ' + o.note : '') + '</span></div>';
-    }
-    html += '</div>';
-  } else {
-    html += '<div style="margin:10px 0 4px"><span class="none">ยังไม่มีร้านเสนอราคา — กดปุ่มด้านล่างเพื่อหาราคา</span></div>';
-  }
-  if (it.online) html += '<p class="online"><b>ราคาตลาด:</b> ' + it.online + '</p>';
-  html += '<div class="links">';
-  for (var k = 0; k < SHOPS.length; k++) {
-    var qq = it.q + (SHOPS[k][0] === "Google" ? " ราคา" : "");
-    html += '<a href="' + SHOPS[k][1] + encodeURIComponent(qq) + '" target="_blank" rel="noopener">' + SHOPS[k][0] + '</a>';
-  }
-  html += '</div></div>';
+function baht(n){ return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+
+function load(){
+  fetch(SB + '/rest/v1/pc_items?select=*,pc_offers(*)&order=no.asc', {headers: H})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(rows){ DATA = rows; render(); })
+    .catch(function(e){ document.getElementById('loading').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message + ' — ลองกดรีเฟรช'; });
 }
-host.innerHTML = html;
+
+function render(){
+  document.getElementById('loading').style.display = 'none';
+  var host = document.getElementById('items');
+  var html = '';
+  var planTotal = 0, missing = 0, vendors = {};
+  for (var i = 0; i < DATA.length; i++){
+    var it = DATA[i];
+    var offers = (it.pc_offers || []).slice().sort(function(a,b){ return a.total - b.total; });
+    if (offers.length){ planTotal += Number(offers[0].total); } else { missing++; }
+    for (var j = 0; j < offers.length; j++){
+      var v = offers[j].vendor;
+      vendors[v] = (vendors[v] || 0) + Number(offers[j].total);
+    }
+    html += '<div class="item"><div class="item-head"><span class="no">' + it.no + '</span>' +
+      '<span class="iname">' + esc(it.name) + '</span>' +
+      '<span class="qty">× ' + Number(it.qty).toLocaleString('th-TH') + ' ' + esc(it.unit) + '</span>' +
+      (it.note ? '<span class="inote">' + esc(it.note) + '</span>' : '') +
+      '<button class="tiny" onclick="editItem(\'' + it.id + '\')">✎ แก้</button>' +
+      '<button class="tiny danger" onclick="delItem(\'' + it.id + '\')">✕ ลบ</button>' +
+      '</div>';
+    if (offers.length){
+      html += '<div class="offers">';
+      for (var j = 0; j < offers.length; j++){
+        var o = offers[j];
+        html += '<div class="offer' + (j === 0 ? ' best' : '') + '">' +
+          '<span class="p">' + baht(o.total) + ' ฿</span>' +
+          '<span class="v">' + esc(o.vendor) + (o.note ? ' · ' + esc(o.note) : '') + '</span>' +
+          '<span class="acts"><button class="tiny" onclick="editOffer(\'' + o.id + '\')">✎</button>' +
+          '<button class="tiny danger" onclick="delOffer(\'' + o.id + '\')">✕</button></span></div>';
+      }
+      html += '</div>';
+    } else {
+      html += '<div style="margin:8px 0 4px"><span class="none">ยังไม่มีราคา — กดปุ่มลิงก์หาราคา แล้วกด "เพิ่มราคาร้าน"</span></div>';
+    }
+    html += '<div class="links">';
+    html += '<button class="tiny primary" onclick="addOffer(\'' + it.id + '\')">＋ เพิ่มราคาร้าน</button>';
+    for (var k = 0; k < SHOPS.length; k++){
+      var q = it.name + (SHOPS[k][0] === 'Google' ? ' ราคา' : '');
+      html += '<a href="' + SHOPS[k][1] + encodeURIComponent(q) + '" target="_blank" rel="noopener">' + SHOPS[k][0] + '</a>';
+    }
+    html += '</div></div>';
+  }
+  host.innerHTML = html;
+
+  document.getElementById('stats').innerHTML =
+    '<div class="stat"><b>' + DATA.length + '</b><span>รายการ</span></div>' +
+    '<div class="stat"><b>' + Object.keys(vendors).length + '</b><span>ร้าน</span></div>' +
+    '<div class="stat"><b>≈' + baht(planTotal) + ' ฿</b><span>ซื้อเจ้าถูกสุดทุกรายการ</span></div>' +
+    '<div class="stat"><b>' + missing + '</b><span>รายการยังไม่มีราคา</span></div>';
+
+  var vlist = Object.keys(vendors).sort(function(a,b){ return vendors[a] - vendors[b]; });
+  var vt = '<tr><th>ร้าน</th><th class="num">ยอดรวมที่เสนอ (฿)</th></tr>';
+  for (var i = 0; i < vlist.length; i++){
+    vt += '<tr><td>' + esc(vlist[i]) + '</td><td class="num">' + baht(vendors[vlist[i]]) + '</td></tr>';
+  }
+  vt += '<tr class="total-row"><td>ซื้อเจ้าถูกสุดของแต่ละรายการ (' + (DATA.length - missing) + ' รายการ)</td><td class="num">≈' + baht(planTotal) + '</td></tr>';
+  document.getElementById('vendorTable').innerHTML = vt;
+}
+
+function api(method, path, body){
+  return fetch(SB + '/rest/v1/' + path, {method: method, headers: H, body: body ? JSON.stringify(body) : undefined})
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(t); }); })
+    .then(load)
+    .catch(function(e){ alert('บันทึกไม่สำเร็จ: ' + e.message); });
+}
+
+function findOffer(id){ for (var i=0;i<DATA.length;i++){ var os=DATA[i].pc_offers||[]; for(var j=0;j<os.length;j++){ if(os[j].id===id) return os[j]; } } return null; }
+function findItem(id){ for (var i=0;i<DATA.length;i++){ if(DATA[i].id===id) return DATA[i]; } return null; }
+
+function addItem(){
+  var name = prompt('ชื่อของที่จะซื้อ:'); if (!name) return;
+  var qty = prompt('จำนวน:', '1'); if (qty === null) return;
+  var unit = prompt('หน่วย (เช่น อัน, ชุด, ถัง):', 'อัน'); if (unit === null) return;
+  var maxNo = 0; for (var i=0;i<DATA.length;i++){ if(DATA[i].no > maxNo) maxNo = DATA[i].no; }
+  api('POST', 'pc_items', {no: maxNo+1, name: name, qty: Number(qty)||1, unit: unit});
+}
+function editItem(id){
+  var it = findItem(id); if (!it) return;
+  var name = prompt('ชื่อของ:', it.name); if (name === null) return;
+  var qty = prompt('จำนวน:', it.qty); if (qty === null) return;
+  var unit = prompt('หน่วย:', it.unit); if (unit === null) return;
+  var note = prompt('หมายเหตุ (เว้นว่างได้):', it.note || ''); if (note === null) return;
+  api('PATCH', 'pc_items?id=eq.' + id, {name: name, qty: Number(qty)||it.qty, unit: unit, note: note});
+}
+function delItem(id){
+  var it = findItem(id); if (!it) return;
+  if (!confirm('ลบรายการ "' + it.name + '" พร้อมราคาทุกร้านของมัน?')) return;
+  api('DELETE', 'pc_items?id=eq.' + id);
+}
+function addOffer(itemId){
+  var it = findItem(itemId); if (!it) return;
+  var vendor = prompt('ชื่อร้าน:'); if (!vendor) return;
+  var total = prompt('ราคารวมของ ' + it.name + ' ทั้ง ' + it.qty + ' ' + it.unit + ' (รวม VAT แล้ว, ใส่ตัวเลขอย่างเดียว):');
+  if (total === null) return;
+  total = Number(String(total).replace(/[, ]/g,''));
+  if (!isFinite(total) || total <= 0){ alert('ราคาไม่ถูกต้อง'); return; }
+  var note = prompt('หมายเหตุ เช่น ยี่ห้อ/เงื่อนไข (เว้นว่างได้):', '') || '';
+  api('POST', 'pc_offers', {item_id: itemId, vendor: vendor, total: total, note: note});
+}
+function editOffer(id){
+  var o = findOffer(id); if (!o) return;
+  var vendor = prompt('ชื่อร้าน:', o.vendor); if (vendor === null) return;
+  var total = prompt('ราคารวม (รวม VAT):', o.total); if (total === null) return;
+  total = Number(String(total).replace(/[, ]/g,''));
+  if (!isFinite(total) || total <= 0){ alert('ราคาไม่ถูกต้อง'); return; }
+  var note = prompt('หมายเหตุ:', o.note || ''); if (note === null) return;
+  api('PATCH', 'pc_offers?id=eq.' + id, {vendor: vendor, total: total, note: note, updated_at: new Date().toISOString()});
+}
+function delOffer(id){
+  var o = findOffer(id); if (!o) return;
+  if (!confirm('ลบราคา ' + baht(o.total) + ' ฿ ของร้าน ' + o.vendor + '?')) return;
+  api('DELETE', 'pc_offers?id=eq.' + id);
+}
+
+load();
 </script>
+</body>
+</html>
