@@ -48,7 +48,7 @@ h2{font-size:18px; margin:28px 0 6px; color:var(--accent)}
 .offer .v{color:var(--muted); font-size:12px; display:block; max-width:220px}
 .offer.best{background:var(--best-soft); border-color:var(--best)}
 .offer.best .p{color:var(--best)}
-.offer.best .v::before{content:"✓ "; color:var(--best); font-weight:700}
+.offer.best .vn::before{content:"✓ "; color:var(--best); font-weight:700}
 .offer .acts{margin-top:4px; display:flex; gap:6px}
 .none{color:var(--warn); background:var(--warn-soft); border:1px dashed var(--warn); border-radius:7px; padding:6px 10px; font-size:13px; display:inline-block}
 .links{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
@@ -87,8 +87,14 @@ footer{margin-top:32px; color:var(--muted); font-size:12px; border-top:1px solid
 </header>
 
 <div class="toolbar">
+  <select id="listSel" onchange="switchList()" style="font-family:inherit; font-size:14px; font-weight:600; padding:5px 8px; border-radius:7px; border:1px solid var(--line); background:var(--card); color:var(--ink); max-width:60vw"></select>
+  <button class="primary" onclick="addList()">＋ สร้างใบขอซื้อใหม่</button>
+  <button onclick="renameList()">✎ เปลี่ยนชื่อใบ</button>
+  <button class="danger" onclick="delList()">✕ ลบใบนี้</button>
+</div>
+<div class="toolbar">
   <button class="primary" onclick="addItem()">＋ เพิ่มรายการของ</button>
-  <button onclick="load()">⟳ รีเฟรชข้อมูล</button>
+  <button onclick="loadLists()">⟳ รีเฟรชข้อมูล</button>
 </div>
 
 <div id="loading">กำลังโหลดข้อมูล…</div>
@@ -114,15 +120,86 @@ var SHOPS = [
   ["Google", "https://www.google.com/search?q="]
 ];
 var DATA = [];
+var LISTS = [];
+var curList = null;
+
+function loadLists(){
+  fetch(SB + '/rest/v1/pc_lists?select=*&order=created_at.desc', {headers: H})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(rows){
+      LISTS = rows;
+      if (!LISTS.length){ document.getElementById('loading').textContent = 'ยังไม่มีใบขอซื้อ — กด "สร้างใบขอซื้อใหม่"'; document.getElementById('items').innerHTML=''; return; }
+      var saved = localStorage.getItem('pc_list');
+      curList = null;
+      for (var i=0;i<LISTS.length;i++){ if (LISTS[i].id === saved) curList = LISTS[i]; }
+      if (!curList) curList = LISTS[0];
+      var sel = document.getElementById('listSel');
+      sel.innerHTML = LISTS.map(function(l){
+        var d = new Date(l.created_at);
+        return '<option value="' + l.id + '"' + (l.id===curList.id?' selected':'') + '>' + esc(l.title) + ' (' + d.toLocaleDateString('th-TH') + ')</option>';
+      }).join('');
+      load();
+    })
+    .catch(function(e){ document.getElementById('loading').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message + ' — ลองกดรีเฟรช'; });
+}
+function switchList(){
+  var id = document.getElementById('listSel').value;
+  for (var i=0;i<LISTS.length;i++){ if (LISTS[i].id === id) curList = LISTS[i]; }
+  localStorage.setItem('pc_list', id);
+  load();
+}
+function addList(){
+  var d = new Date();
+  var title = prompt('ชื่อใบขอซื้อใหม่ (เช่น งานซ่อมเล้า 2):', 'ขอซื้อ ' + d.toLocaleDateString('th-TH'));
+  if (!title) return;
+  fetch(SB + '/rest/v1/pc_lists', {method:'POST', headers: Object.assign({Prefer:'return=representation'}, H), body: JSON.stringify({title: title})})
+    .then(function(r){ return r.json(); })
+    .then(function(rows){ if (rows[0]) localStorage.setItem('pc_list', rows[0].id); loadLists(); })
+    .catch(function(e){ alert('สร้างไม่สำเร็จ: ' + e.message); });
+}
+function renameList(){
+  if (!curList) return;
+  var title = prompt('ชื่อใบขอซื้อ:', curList.title); if (!title) return;
+  api('PATCH', 'pc_lists?id=eq.' + curList.id, {title: title});
+}
+function delList(){
+  if (!curList) return;
+  if (!confirm('ลบใบ "' + curList.title + '" พร้อมรายการของและราคาทั้งหมดในใบนี้? ลบแล้วกู้คืนไม่ได้')) return;
+  localStorage.removeItem('pc_list');
+  fetch(SB + '/rest/v1/pc_lists?id=eq.' + curList.id, {method:'DELETE', headers:H}).then(loadLists);
+}
 
 function baht(n){ return Number(n).toLocaleString('th-TH', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
+var HISTORY = [];
 function load(){
-  fetch(SB + '/rest/v1/pc_items?select=*,pc_offers(*)&order=no.asc', {headers: H})
+  if (!curList){ loadLists(); return; }
+  fetch(SB + '/rest/v1/pc_items?select=*,pc_offers(*),pc_lists(title,created_at)&order=no.asc', {headers: H})
     .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function(rows){ DATA = rows; render(); })
+    .then(function(rows){
+      DATA = rows.filter(function(x){ return x.list_id === curList.id; });
+      HISTORY = rows.filter(function(x){ return x.list_id !== curList.id; });
+      render();
+    })
     .catch(function(e){ document.getElementById('loading').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message + ' — ลองกดรีเฟรช'; });
+}
+function normName(s){ return String(s||'').toLowerCase().replace(/[\s"'.\-]/g,''); }
+function findHistory(name){
+  var key = normName(name);
+  var best = null;
+  for (var i = 0; i < HISTORY.length; i++){
+    var h = HISTORY[i];
+    var hk = normName(h.name);
+    if (hk !== key && hk.indexOf(key) === -1 && key.indexOf(hk) === -1) continue;
+    var os = (h.pc_offers || []).slice().sort(function(a,b){ return a.total - b.total; });
+    if (!os.length) continue;
+    if (!best || os[0].total < best.total){
+      best = {total: os[0].total, vendor: os[0].vendor, qty: h.qty, unit: h.unit,
+              list: h.pc_lists ? h.pc_lists.title : '', date: h.pc_lists ? h.pc_lists.created_at : null};
+    }
+  }
+  return best;
 }
 
 function render(){
@@ -149,15 +226,36 @@ function render(){
       html += '<div class="offers">';
       for (var j = 0; j < offers.length; j++){
         var o = offers[j];
+        var perUnit = Number(it.qty) > 0 ? o.total / Number(it.qty) : null;
         html += '<div class="offer' + (j === 0 ? ' best' : '') + '">' +
-          '<span class="p">' + baht(o.total) + ' ฿</span>' +
-          '<span class="v">' + esc(o.vendor) + (o.note ? ' · ' + esc(o.note) : '') + '</span>' +
+          '<span class="p">' + baht(o.total) + ' ฿ <small style="font-weight:500">รวม VAT</small></span>' +
+          '<span class="v" style="font-variant-numeric:tabular-nums">' +
+            (o.total_ex != null ? 'ก่อน VAT ' + baht(o.total_ex) + ' ฿' : 'ก่อน VAT —') +
+            (perUnit != null ? ' · ชิ้นละ ' + baht(perUnit) + ' ฿' : '') + '</span>' +
+          '<span class="v vn">' + esc(o.vendor) + (o.note ? ' · ' + esc(o.note) : '') + '</span>' +
           '<span class="acts"><button class="tiny" onclick="editOffer(\'' + o.id + '\')">✎</button>' +
           '<button class="tiny danger" onclick="delOffer(\'' + o.id + '\')">✕</button></span></div>';
       }
       html += '</div>';
     } else {
       html += '<div style="margin:8px 0 4px"><span class="none">ยังไม่มีราคา — กดปุ่มลิงก์หาราคา แล้วกด "เพิ่มราคาร้าน"</span></div>';
+    }
+    var hist = findHistory(it.name);
+    if (hist){
+      var histLine = '📜 เคยหาราคาไว้: <b>' + baht(hist.total) + ' ฿</b> / ' + Number(hist.qty).toLocaleString('th-TH') + ' ' + esc(hist.unit) +
+        ' (' + esc(hist.vendor) + ' · ใบ ' + esc(hist.list) + (hist.date ? ' ' + new Date(hist.date).toLocaleDateString('th-TH') : '') + ')';
+      if (offers.length && Number(hist.qty) === Number(it.qty)){
+        var diff = offers[0].total - hist.total;
+        if (Math.abs(diff) > 0.005){
+          var pct = (Math.abs(diff) / hist.total * 100).toFixed(1);
+          histLine += diff > 0
+            ? ' — รอบนี้<b style="color:var(--danger)">แพงขึ้น ' + baht(diff) + ' ฿ (+' + pct + '%)</b>'
+            : ' — รอบนี้<b style="color:var(--best)">ถูกลง ' + baht(-diff) + ' ฿ (−' + pct + '%)</b>';
+        } else {
+          histLine += ' — ราคาเท่าเดิม';
+        }
+      }
+      html += '<div style="font-size:13px; color:var(--muted); background:var(--warn-soft); border-radius:6px; padding:5px 10px; margin:6px 0 2px">' + histLine + '</div>';
     }
     html += '<div class="links">';
     html += '<button class="tiny primary" onclick="addOffer(\'' + it.id + '\')">＋ เพิ่มราคาร้าน</button>';
@@ -199,7 +297,7 @@ function addItem(){
   var qty = prompt('จำนวน:', '1'); if (qty === null) return;
   var unit = prompt('หน่วย (เช่น อัน, ชุด, ถัง):', 'อัน'); if (unit === null) return;
   var maxNo = 0; for (var i=0;i<DATA.length;i++){ if(DATA[i].no > maxNo) maxNo = DATA[i].no; }
-  api('POST', 'pc_items', {no: maxNo+1, name: name, qty: Number(qty)||1, unit: unit});
+  api('POST', 'pc_items', {no: maxNo+1, name: name, qty: Number(qty)||1, unit: unit, list_id: curList.id});
 }
 function editItem(id){
   var it = findItem(id); if (!it) return;
@@ -214,24 +312,32 @@ function delItem(id){
   if (!confirm('ลบรายการ "' + it.name + '" พร้อมราคาทุกร้านของมัน?')) return;
   api('DELETE', 'pc_items?id=eq.' + id);
 }
+function num(s){ var n = Number(String(s).replace(/[, ]/g,'')); return isFinite(n) && n > 0 ? n : null; }
+function askPrices(qty, unit, curEx, curInc){
+  var ex = prompt('ราคารวมทั้ง ' + qty + ' ' + unit + ' "ก่อน VAT" (เว้นว่างถ้าไม่รู้ เดี๋ยวคำนวณจากหลัง VAT ให้ · ถ้าบิลไม่มี VAT ใส่เท่ากันทั้งสองช่อง):', curEx != null ? curEx : '');
+  if (ex === null) return null;
+  var inc = prompt('ราคารวมทั้ง ' + qty + ' ' + unit + ' "รวม VAT แล้ว" (เว้นว่างถ้าไม่รู้ เดี๋ยวบวก 7% ให้):', curInc != null ? curInc : '');
+  if (inc === null) return null;
+  ex = num(ex); inc = num(inc);
+  if (ex == null && inc == null){ alert('ต้องใส่ราคาอย่างน้อย 1 ช่อง'); return null; }
+  if (inc == null) inc = Math.round(ex * 1.07 * 100) / 100;
+  if (ex == null) ex = Math.round(inc / 1.07 * 100) / 100;
+  return {ex: ex, inc: inc};
+}
 function addOffer(itemId){
   var it = findItem(itemId); if (!it) return;
   var vendor = prompt('ชื่อร้าน:'); if (!vendor) return;
-  var total = prompt('ราคารวมของ ' + it.name + ' ทั้ง ' + it.qty + ' ' + it.unit + ' (รวม VAT แล้ว, ใส่ตัวเลขอย่างเดียว):');
-  if (total === null) return;
-  total = Number(String(total).replace(/[, ]/g,''));
-  if (!isFinite(total) || total <= 0){ alert('ราคาไม่ถูกต้อง'); return; }
+  var p = askPrices(it.qty, it.unit, null, null); if (!p) return;
   var note = prompt('หมายเหตุ เช่น ยี่ห้อ/เงื่อนไข (เว้นว่างได้):', '') || '';
-  api('POST', 'pc_offers', {item_id: itemId, vendor: vendor, total: total, note: note});
+  api('POST', 'pc_offers', {item_id: itemId, vendor: vendor, total: p.inc, total_ex: p.ex, note: note});
 }
 function editOffer(id){
   var o = findOffer(id); if (!o) return;
+  var it = null; for (var i=0;i<DATA.length;i++){ var os=DATA[i].pc_offers||[]; for(var j=0;j<os.length;j++){ if(os[j].id===id) it=DATA[i]; } }
   var vendor = prompt('ชื่อร้าน:', o.vendor); if (vendor === null) return;
-  var total = prompt('ราคารวม (รวม VAT):', o.total); if (total === null) return;
-  total = Number(String(total).replace(/[, ]/g,''));
-  if (!isFinite(total) || total <= 0){ alert('ราคาไม่ถูกต้อง'); return; }
+  var p = askPrices(it ? it.qty : '?', it ? it.unit : '', o.total_ex, o.total); if (!p) return;
   var note = prompt('หมายเหตุ:', o.note || ''); if (note === null) return;
-  api('PATCH', 'pc_offers?id=eq.' + id, {vendor: vendor, total: total, note: note, updated_at: new Date().toISOString()});
+  api('PATCH', 'pc_offers?id=eq.' + id, {vendor: vendor, total: p.inc, total_ex: p.ex, note: note, updated_at: new Date().toISOString()});
 }
 function delOffer(id){
   var o = findOffer(id); if (!o) return;
@@ -239,7 +345,7 @@ function delOffer(id){
   api('DELETE', 'pc_offers?id=eq.' + id);
 }
 
-load();
+loadLists();
 </script>
 </body>
 </html>
