@@ -75,6 +75,19 @@ tr:last-child td{border-bottom:none}
 .total-row td{font-weight:700; background:var(--best-soft); color:var(--best)}
 footer{margin-top:32px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:10px}
 #loading{padding:30px; text-align:center; color:var(--muted)}
+.tabs{display:flex; gap:6px; margin:0 0 10px}
+.tab{font-size:14px; padding:8px 16px; border-radius:9px; background:var(--chip); color:var(--muted)}
+.tab.active{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
+input, select{font-family:inherit; font-size:14px; padding:6px 8px; border-radius:7px; border:1px solid var(--line); background:var(--card); color:var(--ink)}
+.brrow{display:flex; flex-wrap:wrap; gap:6px; padding:9px 0; border-bottom:1px dashed var(--line); align-items:center}
+.brrow .f-name{flex:1 1 220px}
+.steps{display:flex; gap:4px; flex-wrap:wrap; align-items:center; margin:7px 0 2px}
+.step{font-size:11px; background:var(--chip); border:1px solid var(--line); border-radius:5px; padding:1px 7px; color:var(--muted); white-space:nowrap}
+.step.on{background:var(--accent-soft); color:var(--accent); border-color:var(--accent); font-weight:600}
+.urg{font-size:11px; border-radius:5px; padding:1px 7px; font-weight:700; border:1px solid var(--line); background:var(--chip); color:var(--muted)}
+.urg.hot{background:var(--warn-soft); color:var(--danger); border-color:var(--danger)}
+.reqline{font-size:13px; padding:5px 0; border-bottom:1px dashed var(--line)}
+.reqline:last-of-type{border-bottom:none}
 </style>
 </head>
 <body>
@@ -86,15 +99,27 @@ footer{margin-top:32px; color:var(--muted); font-size:12px; border-top:1px solid
   <div class="stats" id="stats"></div>
 </header>
 
+<div class="tabs">
+  <button id="tabClerk" class="tab" onclick="showView('clerk')">💰 เทียบราคา (เสมียนเบิกไพร)</button>
+  <button id="tabBranch" class="tab" onclick="showView('branch')">📝 สั่งของ (สาขา)</button>
+</div>
+
+<div id="viewClerk">
+<h2 style="margin-top:10px">📥 ใบสั่งของจากสาขา</h2>
+<p class="hint">สาขากรอกในแท็บ "สั่งของ (สาขา)" แล้วจะเด้งมาที่นี่ทันที · ของด่วนขึ้นก่อน · กด "ดึงเข้าใบเทียบราคา" เพื่อเริ่มหาราคา</p>
+<div id="reqBox" class="hint">กำลังโหลด…</div>
+
+<h2>ใบเทียบราคา</h2>
 <div class="toolbar">
-  <select id="listSel" onchange="switchList()" style="font-family:inherit; font-size:14px; font-weight:600; padding:5px 8px; border-radius:7px; border:1px solid var(--line); background:var(--card); color:var(--ink); max-width:60vw"></select>
+  <select id="listSel" onchange="switchList()" style="font-weight:600; max-width:60vw"></select>
   <button class="primary" onclick="addList()">＋ สร้างใบขอซื้อใหม่</button>
   <button onclick="renameList()">✎ เปลี่ยนชื่อใบ</button>
   <button class="danger" onclick="delList()">✕ ลบใบนี้</button>
 </div>
 <div class="toolbar">
   <button class="primary" onclick="addItem()">＋ เพิ่มรายการของ</button>
-  <button onclick="loadLists()">⟳ รีเฟรชข้อมูล</button>
+  <button onclick="printSummary()">🖨 พิมพ์ใบขอสั่งซื้อ (ยื่นเซ็นอนุมัติ)</button>
+  <button onclick="refreshAll()">⟳ รีเฟรชข้อมูล</button>
 </div>
 
 <div id="loading">กำลังโหลดข้อมูล…</div>
@@ -102,6 +127,25 @@ footer{margin-top:32px; color:var(--muted); font-size:12px; border-top:1px solid
 
 <h2>ยอดรวมแต่ละร้าน</h2>
 <div class="tbl-scroll"><table id="vendorTable"></table></div>
+</div>
+
+<div id="viewBranch" style="display:none">
+<h2 style="margin-top:10px">📝 สั่งของถึงสำนักงานใหญ่ (เบิกไพร)</h2>
+<p class="hint">เลือกสาขา กรอกของที่ต้องการ แล้วกดส่ง — เสมียนเบิกไพรเห็นทันที ไม่ต้องเขียนกระดาษ · พิมพ์ชื่อของแล้วระบบจะเดาชื่อจากของที่เคยสั่งให้เลือก</p>
+<div class="toolbar" style="align-items:center">สาขา:&nbsp;<select id="brSel" onchange="brSave()" style="font-weight:600"></select></div>
+<div class="item">
+  <b>ใบสั่งของใหม่</b>
+  <div id="brRows"></div>
+  <div class="toolbar" style="margin:12px 0 0">
+    <button onclick="brAddRow()">＋ เพิ่มของอีกชิ้น</button>
+    <button class="primary" onclick="brSubmit()">📤 ส่งใบสั่งของ</button>
+  </div>
+</div>
+<h2>ใบสั่งของที่ส่งไปแล้ว (ติดตามสถานะ)</h2>
+<div id="brReqs" class="hint">กำลังโหลด…</div>
+</div>
+
+<datalist id="nameSug"></datalist>
 
 <footer>ราคาที่กรอก = ยอดรวมของจำนวนที่ขอซื้อ รวม VAT · ปุ่มลิงก์พาไปหน้าค้นหาราคาของแต่ละร้านค้าออนไลน์ (ส่งถึงราชบุรีและทั่วประเทศ) · แก้ไขข้อมูลได้ทุกคนที่มีลิงก์นี้</footer>
 </div>
@@ -122,6 +166,10 @@ var SHOPS = [
 var DATA = [];
 var LISTS = [];
 var curList = null;
+var BRANCHES = ['เบิกไพร','ปากท่อ','ท่าม่วง','วันครู 1','วันครู 2','บ้านเดอะเบสท์'];
+var STATUSES = ['ส่งแล้ว','กำลังเทียบราคา','รออนุมัติ','อนุมัติแล้ว','สั่งของแล้ว','ของมาถึงแล้ว'];
+var REQS = [];
+var ALLITEMS = [];
 
 function loadLists(){
   fetch(SB + '/rest/v1/pc_lists?select=*&order=created_at.desc', {headers: H})
@@ -345,7 +393,264 @@ function delOffer(id){
   api('DELETE', 'pc_offers?id=eq.' + id);
 }
 
-loadLists();
+/* ---------- ใบสั่งของจากสาขา ---------- */
+function showView(v){
+  document.getElementById('viewClerk').style.display = v === 'clerk' ? '' : 'none';
+  document.getElementById('viewBranch').style.display = v === 'branch' ? '' : 'none';
+  document.getElementById('tabClerk').className = 'tab' + (v === 'clerk' ? ' active' : '');
+  document.getElementById('tabBranch').className = 'tab' + (v === 'branch' ? ' active' : '');
+  if (history.replaceState) history.replaceState(null, '', v === 'branch' ? '#branch' : location.pathname);
+  if (v === 'clerk') loadLists();
+  loadReqs();
+}
+function refreshAll(){ loadLists(); loadReqs(); }
+
+function loadReqs(){
+  Promise.all([
+    fetch(SB + '/rest/v1/pc_requests?select=*,pc_request_items(*)&order=created_at.desc', {headers: H})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+    fetch(SB + '/rest/v1/pc_items?select=name,qty,unit,pc_offers(total,vendor),pc_lists(title,created_at)', {headers: H})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  ]).then(function(res){
+    REQS = res[0]; ALLITEMS = res[1];
+    buildNameSug(); renderReqsClerk(); renderReqsBranch();
+  }).catch(function(e){
+    document.getElementById('reqBox').innerHTML = 'โหลดใบสั่งของไม่สำเร็จ: ' + esc(e.message) + ' — ลองกดรีเฟรช';
+    document.getElementById('brReqs').innerHTML = 'โหลดไม่สำเร็จ: ' + esc(e.message);
+  });
+}
+function buildNameSug(){
+  var seen = {}, opts = '', all = [];
+  for (var i=0;i<ALLITEMS.length;i++) all.push(ALLITEMS[i].name);
+  for (var i=0;i<REQS.length;i++){ var its = REQS[i].pc_request_items || []; for (var j=0;j<its.length;j++) all.push(its[j].name); }
+  for (var i=0;i<all.length;i++){ var k = normName(all[i]); if (!k || seen[k]) continue; seen[k] = 1; opts += '<option value="' + esc(all[i]) + '">'; }
+  document.getElementById('nameSug').innerHTML = opts;
+}
+function histFor(name){
+  var key = normName(name); if (!key) return null;
+  var best = null;
+  for (var i=0;i<ALLITEMS.length;i++){
+    var h = ALLITEMS[i], hk = normName(h.name);
+    if (hk !== key && hk.indexOf(key) === -1 && key.indexOf(hk) === -1) continue;
+    var os = (h.pc_offers || []).slice().sort(function(a,b){ return a.total - b.total; });
+    if (!os.length) continue;
+    var per = Number(h.qty) > 0 ? os[0].total / Number(h.qty) : os[0].total;
+    if (!best || per < best.per)
+      best = {per: per, vendor: os[0].vendor, total: os[0].total, qty: h.qty, unit: h.unit,
+              list: h.pc_lists ? h.pc_lists.title : '', date: h.pc_lists ? h.pc_lists.created_at : null};
+  }
+  return best;
+}
+function reqUrgent(rq){ var its = rq.pc_request_items || []; for (var i=0;i<its.length;i++){ if (its[i].urgency === 'ด่วนมาก') return true; } return false; }
+function reqMinDate(rq){ var its = rq.pc_request_items || [], m = null; for (var i=0;i<its.length;i++){ if (its[i].need_date && (!m || its[i].need_date < m)) m = its[i].need_date; } return m; }
+function sortReqs(a, b){
+  var da = a.status === 'ของมาถึงแล้ว' ? 1 : 0, db = b.status === 'ของมาถึงแล้ว' ? 1 : 0;
+  if (da !== db) return da - db;
+  var ua = reqUrgent(a) ? 0 : 1, ub = reqUrgent(b) ? 0 : 1;
+  if (ua !== ub) return ua - ub;
+  var ma = reqMinDate(a) || '9999', mb = reqMinDate(b) || '9999';
+  if (ma !== mb) return ma < mb ? -1 : 1;
+  return a.created_at < b.created_at ? 1 : -1;
+}
+function statusChips(st){
+  var idx = STATUSES.indexOf(st), out = '';
+  for (var i=0;i<STATUSES.length;i++) out += '<span class="step' + (i <= idx ? ' on' : '') + '">' + STATUSES[i] + '</span>';
+  return out;
+}
+function reqItemLine(x, withHist){
+  var s = '<div class="reqline"><b>' + esc(x.name) + '</b> × ' + Number(x.qty).toLocaleString('th-TH') + ' ' + esc(x.unit || '') +
+    (x.site ? ' · หน้างาน: ' + esc(x.site) : '') + (x.worker ? ' · ช่าง: ' + esc(x.worker) : '') +
+    (x.need_date ? ' · ต้องใช้ ' + new Date(x.need_date).toLocaleDateString('th-TH') : '') +
+    ' <span class="urg' + (x.urgency === 'ด่วนมาก' ? ' hot' : '') + '">' + esc(x.urgency || 'ปกติ') + '</span>';
+  if (withHist){
+    var h = histFor(x.name);
+    if (h) s += '<div style="font-size:12px; color:var(--muted)">📜 เคยได้จาก <b>' + esc(h.vendor) + '</b> ' + baht(h.total) + ' ฿ / ' +
+      Number(h.qty).toLocaleString('th-TH') + ' ' + esc(h.unit || '') +
+      (h.date ? ' เมื่อ ' + new Date(h.date).toLocaleDateString('th-TH') : '') + '</div>';
+  }
+  return s + '</div>';
+}
+function renderReqsClerk(){
+  var box = document.getElementById('reqBox');
+  if (!REQS.length){ box.innerHTML = 'ยังไม่มีใบสั่งของจากสาขา'; return; }
+  var rs = REQS.slice().sort(sortReqs), html = '';
+  for (var i=0;i<rs.length;i++){
+    var rq = rs[i], its = rq.pc_request_items || [], done = rq.status === 'ของมาถึงแล้ว';
+    html += '<div class="item"' + (done ? ' style="opacity:.55"' : '') + '>' +
+      '<div class="item-head"><span class="iname">🏠 สาขา' + esc(rq.branch) + '</span>' +
+      '<span class="qty">' + new Date(rq.created_at).toLocaleDateString('th-TH') + ' · ' + its.length + ' รายการ</span>' +
+      (reqUrgent(rq) ? '<span class="urg hot">🔴 มีของด่วน</span>' : '') + '</div>' +
+      '<div class="steps">' + statusChips(rq.status) + '</div>';
+    for (var j=0;j<its.length;j++) html += reqItemLine(its[j], true);
+    html += '<div class="toolbar" style="margin:10px 0 0">';
+    if (rq.list_id) html += '<button onclick="openReqList(\'' + rq.id + '\')">📂 เปิดใบเทียบราคา</button>';
+    else html += '<button class="primary" onclick="pullReq(\'' + rq.id + '\')">📋 ดึงเข้าใบเทียบราคา</button>';
+    html += '<select onchange="setReqStatus(\'' + rq.id + '\', this.value)">';
+    for (var k=0;k<STATUSES.length;k++) html += '<option' + (STATUSES[k] === rq.status ? ' selected' : '') + '>' + STATUSES[k] + '</option>';
+    html += '</select><button class="tiny danger" onclick="delReq(\'' + rq.id + '\')">✕ ลบ</button></div></div>';
+  }
+  box.innerHTML = html;
+}
+function findReq(id){ for (var i=0;i<REQS.length;i++){ if (REQS[i].id === id) return REQS[i]; } return null; }
+function setReqStatus(id, st){
+  fetch(SB + '/rest/v1/pc_requests?id=eq.' + id, {method:'PATCH', headers:H, body: JSON.stringify({status: st})}).then(loadReqs);
+}
+function delReq(id){
+  if (!confirm('ลบใบสั่งของนี้? (ใบเทียบราคาที่ดึงไปแล้วจะไม่ถูกลบ)')) return;
+  fetch(SB + '/rest/v1/pc_requests?id=eq.' + id, {method:'DELETE', headers:H}).then(loadReqs);
+}
+function openReqList(id){
+  var rq = findReq(id); if (!rq || !rq.list_id) return;
+  localStorage.setItem('pc_list', rq.list_id);
+  loadLists();
+  document.getElementById('listSel').scrollIntoView({behavior:'smooth'});
+}
+function pullReq(id){
+  var rq = findReq(id); if (!rq) return;
+  var d = new Date(rq.created_at);
+  fetch(SB + '/rest/v1/pc_lists', {method:'POST', headers: Object.assign({Prefer:'return=representation'}, H),
+    body: JSON.stringify({title: 'สั่งของ ' + rq.branch + ' ' + d.toLocaleDateString('th-TH')})})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(rows){
+      var list = rows[0];
+      var items = (rq.pc_request_items || []).map(function(x, i){
+        var np = [];
+        if (x.site) np.push('หน้างาน ' + x.site);
+        if (x.worker) np.push('ช่าง ' + x.worker);
+        if (x.need_date) np.push('ต้องใช้ ' + new Date(x.need_date).toLocaleDateString('th-TH'));
+        if (x.urgency === 'ด่วนมาก') np.push('🔴 ด่วนมาก');
+        return {no: i + 1, name: x.name, qty: x.qty, unit: x.unit || 'อัน', note: np.join(' · '), list_id: list.id};
+      });
+      return fetch(SB + '/rest/v1/pc_items', {method:'POST', headers:H, body: JSON.stringify(items)})
+        .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status);
+          return fetch(SB + '/rest/v1/pc_requests?id=eq.' + rq.id, {method:'PATCH', headers:H,
+            body: JSON.stringify({status: 'กำลังเทียบราคา', list_id: list.id})});
+        })
+        .then(function(){ localStorage.setItem('pc_list', list.id); loadReqs(); loadLists(); });
+    })
+    .catch(function(e){ alert('ดึงไม่สำเร็จ: ' + e.message); });
+}
+
+/* ---------- ฝั่งสาขา ---------- */
+function brSave(){ localStorage.setItem('pc_branch', document.getElementById('brSel').value); renderReqsBranch(); }
+function brAddRow(){
+  var d = document.createElement('div'); d.className = 'brrow';
+  d.innerHTML = '<input class="f-name" list="nameSug" placeholder="ชื่อของ เช่น สายไฟ VAF 2x1.5">' +
+    '<input class="f-qty" type="number" min="0" step="any" placeholder="จำนวน" style="width:75px">' +
+    '<input class="f-unit" placeholder="หน่วย" style="width:75px">' +
+    '<input class="f-site" placeholder="หน้างาน เช่น เล้า 3" style="width:130px">' +
+    '<input class="f-worker" placeholder="ชื่อช่าง" style="width:110px">' +
+    '<input class="f-date" type="date" title="วันที่ต้องใช้">' +
+    '<select class="f-urg"><option>ปกติ</option><option>ด่วนมาก</option></select>' +
+    '<button class="tiny danger" onclick="this.parentNode.remove()">✕</button>';
+  document.getElementById('brRows').appendChild(d);
+}
+function brSubmit(){
+  var branch = document.getElementById('brSel').value;
+  var rows = document.getElementById('brRows').children;
+  var items = [];
+  for (var i=0;i<rows.length;i++){
+    var row = rows[i];
+    function q(c){ var el = row.querySelector(c); return el ? el.value.trim() : ''; }
+    var name = q('.f-name'); if (!name) continue;
+    items.push({name: name, qty: Number(q('.f-qty')) || 1, unit: q('.f-unit') || 'อัน',
+      site: q('.f-site'), worker: q('.f-worker'), need_date: q('.f-date') || null, urgency: q('.f-urg') || 'ปกติ'});
+  }
+  if (!items.length){ alert('กรอกชื่อของอย่างน้อย 1 รายการ'); return; }
+  if (!confirm('ส่งใบสั่งของ ' + items.length + ' รายการ ในนามสาขา' + branch + ' ไปให้เสมียนเบิกไพร?')) return;
+  fetch(SB + '/rest/v1/pc_requests', {method:'POST', headers: Object.assign({Prefer:'return=representation'}, H),
+    body: JSON.stringify({branch: branch})})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function(rows2){
+      for (var i=0;i<items.length;i++) items[i].request_id = rows2[0].id;
+      return fetch(SB + '/rest/v1/pc_request_items', {method:'POST', headers:H, body: JSON.stringify(items)});
+    })
+    .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status);
+      document.getElementById('brRows').innerHTML = ''; brAddRow();
+      alert('✅ ส่งใบสั่งของแล้ว เสมียนเบิกไพรจะเห็นทันที ติดตามสถานะได้ที่ด้านล่างของหน้านี้');
+      loadReqs();
+    })
+    .catch(function(e){ alert('ส่งไม่สำเร็จ: ' + e.message); });
+}
+function renderReqsBranch(){
+  var box = document.getElementById('brReqs');
+  var branch = document.getElementById('brSel').value;
+  var mine = REQS.filter(function(r){ return r.branch === branch; });
+  if (!mine.length){ box.innerHTML = 'สาขา' + esc(branch) + ' ยังไม่เคยส่งใบสั่งของ'; return; }
+  var html = '';
+  for (var i=0;i<mine.length;i++){
+    var rq = mine[i], its = rq.pc_request_items || [], done = rq.status === 'ของมาถึงแล้ว';
+    html += '<div class="item"' + (done ? ' style="opacity:.55"' : '') + '>' +
+      '<div class="item-head"><span class="iname">ใบสั่งของ ' + new Date(rq.created_at).toLocaleDateString('th-TH') + '</span>' +
+      '<span class="qty">' + its.length + ' รายการ</span>' +
+      (reqUrgent(rq) ? '<span class="urg hot">🔴 มีของด่วน</span>' : '') + '</div>' +
+      '<div class="steps">' + statusChips(rq.status) + '</div>';
+    for (var j=0;j<its.length;j++) html += reqItemLine(its[j], false);
+    if (rq.status === 'ส่งแล้ว')
+      html += '<div class="toolbar" style="margin:10px 0 0"><button class="tiny danger" onclick="delReq(\'' + rq.id + '\')">✕ ยกเลิกใบนี้ (ก่อนเสมียนรับ)</button></div>';
+    html += '</div>';
+  }
+  box.innerHTML = html;
+}
+
+/* ---------- พิมพ์ใบขอสั่งซื้อ ---------- */
+function printSummary(){
+  if (!curList || !DATA.length){ alert('ใบเทียบราคานี้ยังไม่มีรายการของ'); return; }
+  var rq = null;
+  for (var i=0;i<REQS.length;i++){ if (REQS[i].list_id === curList.id) rq = REQS[i]; }
+  var rows = '', total = 0, miss = 0;
+  for (var i=0;i<DATA.length;i++){
+    var it = DATA[i];
+    var os = (it.pc_offers || []).slice().sort(function(a,b){ return a.total - b.total; });
+    if (os.length) total += Number(os[0].total); else miss++;
+    var others = os.slice(1, 3).map(function(o){ return esc(o.vendor) + ' ' + baht(o.total); }).join('<br>');
+    rows += '<tr><td>' + it.no + '</td><td>' + esc(it.name) + (it.note ? '<br><small>' + esc(it.note) + '</small>' : '') + '</td>' +
+      '<td class="num">' + Number(it.qty).toLocaleString('th-TH') + ' ' + esc(it.unit) + '</td>' +
+      '<td>' + (os.length ? esc(os[0].vendor) : '—') + '</td>' +
+      '<td class="num">' + (os.length ? baht(os[0].total) : '—') + '</td>' +
+      '<td class="cmp">' + (others || '—') + '</td></tr>';
+  }
+  var today = new Date().toLocaleDateString('th-TH', {year:'numeric', month:'long', day:'numeric'});
+  var w = window.open('', '_blank');
+  if (!w){ alert('เบราว์เซอร์บล็อกหน้าต่างพิมพ์ — อนุญาต pop-up ให้เว็บนี้ก่อน'); return; }
+  w.document.write('<!doctype html><html lang="th"><head><meta charset="utf-8"><title>ใบขอสั่งซื้อ — ' + esc(curList.title) + '</title><style>' +
+    'body{font-family:"Sukhumvit Set","Leelawadee UI","Noto Sans Thai","Thonburi",sans-serif; font-size:13px; color:#111; margin:24px}' +
+    'h1{font-size:18px; margin:0 0 2px} .sub{color:#555; margin:0 0 14px; font-size:12px}' +
+    'table{width:100%; border-collapse:collapse; margin:10px 0}' +
+    'th,td{border:1px solid #999; padding:5px 8px; text-align:left; vertical-align:top}' +
+    'th{background:#eee; font-size:12px} td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}' +
+    'td.cmp{font-size:11px; color:#555} small{color:#666}' +
+    '.total td{font-weight:700; background:#f3f3f3}' +
+    '.sig{display:flex; gap:40px; margin-top:44px}' +
+    '.sig div{flex:1; text-align:center; font-size:13px}' +
+    '.sig .line{border-bottom:1px dotted #333; height:38px; margin-bottom:6px}' +
+    '@media print{button{display:none}}' +
+    '</style></head><body>' +
+    '<h1>ใบขอสั่งซื้อ — บริษัท เอสเจเอฟ ฟาร์ม จำกัด</h1>' +
+    '<p class="sub">ใบ: ' + esc(curList.title) +
+    (rq ? ' · สั่งจากสาขา' + esc(rq.branch) : '') +
+    ' · วันที่จัดทำ ' + today + ' · ราคารวม VAT</p>' +
+    '<table><tr><th>#</th><th>รายการ</th><th>จำนวน</th><th>ร้านที่เลือก (ถูกสุด)</th><th>ราคา (฿)</th><th>ราคาเทียบร้านอื่น</th></tr>' +
+    rows +
+    '<tr class="total"><td colspan="4">รวมทั้งสิ้น' + (miss ? ' (ยังไม่มีราคา ' + miss + ' รายการ)' : '') + '</td><td class="num">' + baht(total) + '</td><td></td></tr>' +
+    '</table>' +
+    '<div class="sig"><div><div class="line"></div>ผู้จัดทำ (เสมียน)<br>วันที่ ..........................</div>' +
+    '<div><div class="line"></div>ผู้อนุมัติ (ผู้บริหาร)<br>วันที่ ..........................</div></div>' +
+    '<button onclick="window.print()" style="margin-top:24px; padding:8px 18px; font-size:14px">🖨 พิมพ์</button>' +
+    '</body></html>');
+  w.document.close();
+}
+
+/* ---------- เริ่มต้น ---------- */
+(function(){
+  var opts = '';
+  for (var i=0;i<BRANCHES.length;i++) opts += '<option>' + esc(BRANCHES[i]) + '</option>';
+  document.getElementById('brSel').innerHTML = opts;
+  var saved = localStorage.getItem('pc_branch');
+  if (saved && BRANCHES.indexOf(saved) >= 0) document.getElementById('brSel').value = saved;
+  brAddRow();
+  showView(location.hash === '#branch' ? 'branch' : 'clerk');
+})();
 </script>
 </body>
 </html>
